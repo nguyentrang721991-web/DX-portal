@@ -1,0 +1,8 @@
+{
+  "name": "FPT DX Replication Hub",
+  "description": "Hệ thống quản lý danh mục và tiến độ nhân rộng sản phẩm chuyển đổi số FPT",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
