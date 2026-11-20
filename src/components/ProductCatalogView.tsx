@@ -286,8 +286,14 @@ export function ProductCatalogView({
               </thead>
               <tbody className="divide-y divide-slate-100 text-sm">
                 {filteredProducts.map((product) => {
-                  const statusMeta = STATUS_META[product.status];
-                  const modeMeta = REPLICATION_MODE_META[product.replicationMode];
+                  const statusMeta = STATUS_META[product.status] ?? {
+                    textClass: 'text-slate-700',
+                  };
+                  const modeMeta = REPLICATION_MODE_META[product.replicationMode] ?? {
+                    bgTint: 'bg-slate-50 border-slate-200',
+                    textClass: 'text-slate-700',
+                  };
+                  const linksCount = Array.isArray(product.links) ? product.links.length : 0;
                   return (
                     <tr
                       key={product.id}
@@ -317,7 +323,7 @@ export function ProductCatalogView({
                       </td>
                       <td className="py-3 px-3 whitespace-nowrap">
                         <div className={`text-xs font-medium ${statusMeta.textClass}`}>
-                          {product.status}
+                          {product.status || 'Chưa cập nhật'}
                         </div>
                         <div className="text-[11px] font-mono text-slate-400 tabular-nums mt-0.5">
                           Cập nhật: {formatDateTime(product.statusUpdatedAt)}
@@ -355,7 +361,7 @@ export function ProductCatalogView({
                       </td>
                       <td className="py-3 px-3 text-right font-mono text-xs text-slate-600 whitespace-nowrap tabular-nums">
                         <span className="inline-flex items-center gap-1">
-                          {product.links.length}
+                          {linksCount}
                           <ExternalLink className="w-3 h-3 text-slate-400" />
                         </span>
                       </td>
