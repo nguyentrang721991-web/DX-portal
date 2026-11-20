@@ -792,7 +792,7 @@ app.delete('/api/products/:id', asyncHandler(async (req, res) => {
 
   app.listen(PORT, '0.0.0.0', () => {
     console.log(
-      `FPT DX Replication Hub server listening on http://localhost:3000`
+      `FPT DX Replication Hub server listening on port ${PORT}`
     );
   });
 }
