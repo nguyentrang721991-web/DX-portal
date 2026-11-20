@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import {
-  Download,
+  FileSpreadsheet,
   FilterX,
   Pencil,
   Plus,
@@ -20,7 +20,7 @@ import {
 } from '../types/product.ts';
 import {
   computeTaskHealth,
-  exportDeploymentTasksToCsv,
+  exportDeploymentTasksToExcel,
   formatDateTime,
 } from '../utils/formatters.ts';
 import { DeploymentTaskModal } from './DeploymentTaskModal.tsx';
@@ -247,12 +247,17 @@ export function ImplementationTrackerView({
         <div className="flex items-center gap-2.5 shrink-0">
           <button
             type="button"
-            onClick={() => exportDeploymentTasksToCsv(filteredTasks, productMap)}
+            onClick={() =>
+              exportDeploymentTasksToExcel(filteredTasks, productMap, {
+                singleProduct:
+                  selectedProductId !== 'ALL' ? productMap.get(selectedProductId) : undefined,
+              })
+            }
             disabled={filteredTasks.length === 0}
-            className="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-medium text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-lg transition-colors disabled:opacity-50 whitespace-nowrap shrink-0"
+            className="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-medium text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-lg transition-colors disabled:opacity-50 whitespace-nowrap shrink-0"
           >
-            <Download className="w-4 h-4 text-slate-500" />
-            <span>Xuất CSV ({filteredTasks.length})</span>
+            <FileSpreadsheet className="w-4 h-4 text-emerald-700" />
+            <span>Xuất Excel ({filteredTasks.length})</span>
           </button>
 
           <button
@@ -515,14 +520,30 @@ export function ImplementationTrackerView({
                         </span>
                       )}
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => openAddTask(product.id)}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-700 bg-white hover:bg-slate-100 border border-slate-200 rounded-lg transition-colors whitespace-nowrap shrink-0"
-                    >
-                      <Plus className="w-3.5 h-3.5" />
-                      <span>Thêm đầu việc</span>
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const productTasks = Array.from(parentGroups.values()).flat();
+                          exportDeploymentTasksToExcel(productTasks, productMap, {
+                            singleProduct: product,
+                          });
+                        }}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-emerald-800 bg-emerald-50/70 hover:bg-emerald-100 border border-emerald-200 rounded-lg transition-colors whitespace-nowrap shrink-0"
+                        title={`Xuất Excel tiến độ triển khai của ${product.code}`}
+                      >
+                        <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-700" />
+                        <span>Xuất Excel</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => openAddTask(product.id)}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-700 bg-white hover:bg-slate-100 border border-slate-200 rounded-lg transition-colors whitespace-nowrap shrink-0"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>Thêm đầu việc</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
 

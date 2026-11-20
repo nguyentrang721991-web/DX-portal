@@ -356,9 +356,10 @@ export function DashboardView({
           </div>
 
           <div className="mt-6 pt-4 border-t border-slate-100 text-xs text-slate-500 leading-relaxed">
-            Quy ước FPT DX: <strong className="text-slate-700 font-medium">GO-P</strong> đóng gói thương mại,{' '}
-            <strong className="text-slate-700 font-medium">GO-C</strong> tùy biến theo đơn vị,{' '}
-            <strong className="text-slate-700 font-medium">GO-M</strong> tích hợp nền tảng dùng chung.
+            Quy ước FPT DX: <strong className="text-slate-700 font-medium">GO-P</strong> nhân rộng toàn bộ sản phẩm,{' '}
+            <strong className="text-slate-700 font-medium">GO-C</strong> nhân rộng 1 phần sản phẩm,{' '}
+            <strong className="text-slate-700 font-medium">GO-M</strong> nhân rộng phương pháp luận,{' '}
+            <strong className="text-slate-700 font-medium">NO-GO</strong> không nhân rộng được.
           </div>
         </section>
       </div>

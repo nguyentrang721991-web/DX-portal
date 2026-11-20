@@ -274,6 +274,7 @@ export default function App() {
           ) : selectedProduct ? (
             <ProductDetailView
               product={selectedProduct}
+              deploymentTasks={deploymentTasks.filter((t) => t.productId === selectedProduct.id)}
               onEdit={handleOpenEditModal}
               onDelete={setDeletingProduct}
               onDiscardDraft={handleDiscardDraft}

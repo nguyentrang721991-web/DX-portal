@@ -5,6 +5,7 @@ import {
   Copy,
   ExternalLink,
   FileEdit,
+  FileSpreadsheet,
   Link2,
   Pencil,
   Plus,
@@ -14,6 +15,7 @@ import {
   PRODUCT_STATUSES,
   REPLICATION_MODE_META,
   STATUS_META,
+  type DeploymentTask,
   type Product,
   type ProductLink,
   type ProductStatus,
@@ -21,6 +23,7 @@ import {
 } from '../types/product.ts';
 import {
   ensureValidUrl,
+  exportDeploymentTasksToExcel,
   formatDateTime,
   formatMonthShort,
   getMonthKeyFromIso,
@@ -30,6 +33,7 @@ import {
 
 interface ProductDetailViewProps {
   product: Product;
+  deploymentTasks?: DeploymentTask[];
   onEdit: (product: Product) => void;
   onDelete: (product: Product) => void;
   onDiscardDraft: (productId: string) => Promise<void>;
@@ -44,6 +48,7 @@ interface ProductDetailViewProps {
 
 export function ProductDetailView({
   product,
+  deploymentTasks = [],
   onEdit,
   onDelete,
   onDiscardDraft,
@@ -220,6 +225,19 @@ export function ProductDetailView({
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+            {deploymentTasks.length > 0 && (
+              <button
+                type="button"
+                onClick={() => {
+                  const map = new Map<string, Product>([[product.id, product]]);
+                  exportDeploymentTasksToExcel(deploymentTasks, map, { singleProduct: product });
+                }}
+                className="inline-flex items-center gap-2 px-3.5 py-2 text-sm font-medium text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-lg transition-colors whitespace-nowrap shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+              >
+                <FileSpreadsheet className="w-4 h-4 text-emerald-700" />
+                <span>Xuất Excel tiến độ ({deploymentTasks.length})</span>
+              </button>
+            )}
             <button
               type="button"
               onClick={() => onEdit(product)}
@@ -239,12 +257,16 @@ export function ProductDetailView({
           </div>
         </div>
 
-        {/* 8-Stage Lifecycle Pipeline */}
+        {/* Lifecycle Pipeline */}
         <div className="mt-6 pt-6 border-t border-slate-100">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
             <div>
               <h2 className="text-sm font-semibold text-slate-900">
-                Vòng đời trạng thái sản phẩm (Bước {currentStep}/8)
+                Vòng đời trạng thái sản phẩm (
+                {product.status === 'Đã dừng triển khai'
+                  ? 'Đã dừng triển khai'
+                  : `Bước ${currentStep}/8`}
+                )
               </h2>
               <p className="text-xs text-slate-500 mt-0.5">
                 Nhấp vào từng trạng thái để chuyển bước hiện tại, hoặc nhấn biểu tượng lịch để chỉnh ngày cập nhật của mốc đó.
@@ -270,8 +292,10 @@ export function ProductDetailView({
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             {PRODUCT_STATUSES.map((status, idx) => {
               const stepNum = idx + 1;
+              const isStoppedCard = status === 'Đã dừng triển khai';
+              const isStoppedProduct = product.status === 'Đã dừng triển khai';
               const isCurrent = product.status === status;
-              const isCompleted = stepNum < currentStep;
+              const isCompleted = !isStoppedProduct && !isStoppedCard && stepNum < currentStep;
               const historyEntry = historyMap.get(status);
               const isEditingThisDate = editingStageDate === status;
 
@@ -279,11 +303,15 @@ export function ProductDetailView({
                 <div
                   key={status}
                   className={`rounded-lg border p-3 transition-colors flex flex-col justify-between ${
-                    isCurrent
-                      ? 'bg-orange-50 border-[#F37021] text-slate-900'
-                      : isCompleted || historyEntry
-                        ? 'bg-emerald-50/40 border-emerald-200 text-slate-800'
-                        : 'bg-slate-50/70 border-slate-200 text-slate-500'
+                    isCurrent && isStoppedCard
+                      ? 'bg-red-50 border-red-500 text-slate-900'
+                      : isCurrent
+                        ? 'bg-orange-50 border-[#F37021] text-slate-900'
+                        : isCompleted || historyEntry
+                          ? 'bg-emerald-50/40 border-emerald-200 text-slate-800'
+                          : isStoppedCard
+                            ? 'bg-slate-50/70 border-slate-200 text-slate-500 hover:border-red-200'
+                            : 'bg-slate-50/70 border-slate-200 text-slate-500'
                   }`}
                 >
                   <button
@@ -295,14 +323,16 @@ export function ProductDetailView({
                     <div className="flex items-center justify-between gap-2 mb-1">
                       <span
                         className={`font-mono text-xs font-semibold tabular-nums ${
-                          isCurrent
-                            ? 'text-[#F37021]'
-                            : isCompleted || historyEntry
-                              ? 'text-emerald-700'
-                              : 'text-slate-400'
+                          isCurrent && isStoppedCard
+                            ? 'text-red-700'
+                            : isCurrent
+                              ? 'text-[#F37021]'
+                              : isCompleted || historyEntry
+                                ? 'text-emerald-700'
+                                : 'text-slate-400'
                         }`}
                       >
-                        0{stepNum}
+                        {String(stepNum).padStart(2, '0')}
                         {historyEntry
                           ? ` · ${formatMonthShort(getMonthKeyFromIso(historyEntry.updatedAt))}/${historyEntry.updatedAt.slice(0, 4)}`
                           : ''}
@@ -310,12 +340,22 @@ export function ProductDetailView({
                       {(isCompleted || isCurrent) && (
                         <Check
                           className={`w-3.5 h-3.5 shrink-0 ${
-                            isCurrent ? 'text-[#F37021]' : 'text-emerald-600'
+                            isCurrent && isStoppedCard
+                              ? 'text-red-600'
+                              : isCurrent
+                                ? 'text-[#F37021]'
+                                : 'text-emerald-600'
                           }`}
                         />
                       )}
                     </div>
-                    <div className="text-xs font-semibold leading-snug">{status}</div>
+                    <div
+                      className={`text-xs font-semibold leading-snug ${
+                        isCurrent && isStoppedCard ? 'text-red-800' : ''
+                      }`}
+                    >
+                      {status}
+                    </div>
                   </button>
 
                   <div className="mt-2.5 pt-2 border-t border-slate-200/70 flex items-center justify-between gap-2">

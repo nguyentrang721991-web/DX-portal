@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { FileEdit, Plus, RotateCcw, Save, Trash2, X } from 'lucide-react';
 import {
   FPT_UNIT_SUGGESTIONS,
-  PRODUCT_SOURCE_SUGGESTIONS,
   PRODUCT_STATUSES,
   REPLICATION_MODES,
   REPLICATION_MODE_META,
@@ -486,17 +485,11 @@ export function ProductFormModal({
                 </label>
                 <input
                   type="text"
-                  list="fpt-source-suggestions"
                   value={source}
                   onChange={(e) => setSource(e.target.value)}
-                  placeholder="VD: FPT Smart Cloud"
+                  placeholder="Nhập nguồn sản phẩm..."
                   className="w-full px-3 py-2 text-sm bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                 />
-                <datalist id="fpt-source-suggestions">
-                  {PRODUCT_SOURCE_SUGGESTIONS.map((item) => (
-                    <option key={item} value={item} />
-                  ))}
-                </datalist>
               </div>
 
               <div>
@@ -598,7 +591,7 @@ export function ProductFormModal({
                         }`}
                       >
                         <div className="font-mono text-xs font-bold">{mode}</div>
-                        <div className="text-[11px] text-slate-500 truncate">{meta.shortLabel}</div>
+                        <div className="text-[11px] text-slate-500 leading-snug mt-0.5">{meta.shortLabel}</div>
                       </button>
                     );
                   })}
