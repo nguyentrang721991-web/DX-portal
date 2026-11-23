@@ -734,6 +734,20 @@ app.delete('/api/products/:id', asyncHandler(async (req, res) => {
       }
     })
   );
+    // TEST ONLY - sẽ xóa sau khi kiểm thử G1
+  app.get(
+    '/api/test/confirm-g1',
+    asyncHandler(async (_req, res) => {
+      const result = await workflowService.confirmGate(
+        'IR-MVP-001',
+        'G1',
+        'Trang Nguyen Thi Thu',
+        'Test G1 confirmation from staging'
+      );
+
+      res.json(result);
+    })
+  );
   // ------------------------------------------------
   // Deployment Tasks API
   // ------------------------------------------------
