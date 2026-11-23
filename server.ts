@@ -5,6 +5,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createServer as createViteServer } from 'vite';
 import { createClient } from '@supabase/supabase-js';
+import { WorkflowService } from './src/server/workflowService.ts';
 
 import type {
   DeploymentTask,
