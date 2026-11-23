@@ -316,6 +316,8 @@ function asyncHandler(
 async function startServer() {
   const app = express();
 
+  const workflowService = new WorkflowService(supabase);
+
   app.use(express.json({ limit: '2mb' }));
 
   // Kiểm tra kết nối Supabase và khởi tạo seed nếu DB trống.
