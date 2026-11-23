@@ -4,8 +4,6 @@ import type { AssessmentCase } from '../../types/assessment';
 
 import { getAssessmentCase } from '../../utils/assessmentApi';
 
-Sau đó thêm:
-
 type Props = { productId: string; productName: string; };
 export default function AssessmentWorkspace({ productId, productName }: Props) {
 
