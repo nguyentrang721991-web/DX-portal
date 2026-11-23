@@ -609,7 +609,70 @@ app.delete('/api/products/:id', asyncHandler(async (req, res) => {
 
     res.json(SEED_PRODUCTS);
   }));
+  // ------------------------------------------------
+  // Replication Assessment API
+  // ------------------------------------------------
 
+  app.get(
+    '/api/assessment-cases/:caseCode',
+    asyncHandler(async (req, res) => {
+      const { caseCode } = req.params;
+
+      // 1. Lấy assessment case
+      const { data: assessmentCase, error: caseError } = await supabase
+        .from('assessment_cases')
+        .select('*')
+        .eq('case_code', caseCode)
+        .maybeSingle();
+
+      if (caseError) throw caseError;
+
+      if (!assessmentCase) {
+        res.status(404).json({
+          error: 'Không tìm thấy hồ sơ đánh giá.',
+        });
+        return;
+      }
+
+      // 2. Lấy các Gate của case
+      const { data: gates, error: gatesError } = await supabase
+        .from('case_gates')
+        .select(
+          'id, gate_code, status, decision, confirmed_by, confirmed_at, comment'
+        )
+        .eq('case_id', assessmentCase.id)
+        .order('gate_code', { ascending: true });
+
+      if (gatesError) throw gatesError;
+
+      // 3. Trả snapshot của workflow
+      res.json({
+        id: assessmentCase.id,
+        case_code: assessmentCase.case_code,
+        product_id: assessmentCase.product_id,
+        scope: assessmentCase.scope,
+
+        current_step: assessmentCase.current_step,
+        status: assessmentCase.status,
+
+        assessor: assessmentCase.assessor,
+        reviewer: assessmentCase.reviewer,
+
+        calculated_go: assessmentCase.calculated_go,
+        approved_go: assessmentCase.approved_go,
+
+        criteria_version: assessmentCase.criteria_version,
+        gate_logic_version: assessmentCase.gate_logic_version,
+        workflow_version: assessmentCase.workflow_version,
+        assessment_version: assessmentCase.assessment_version,
+
+        gates: gates ?? [],
+
+        created_at: assessmentCase.created_at,
+        updated_at: assessmentCase.updated_at,
+      });
+    })
+  );
   // ------------------------------------------------
   // Deployment Tasks API
   // ------------------------------------------------
