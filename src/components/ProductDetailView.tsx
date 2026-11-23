@@ -1,3 +1,4 @@
+import AssessmentWorkspace from './assessment/AssessmentWorkspace';
 import { useMemo, useState } from 'react';
 import {
   Calendar,
