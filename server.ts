@@ -676,6 +676,64 @@ app.delete('/api/products/:id', asyncHandler(async (req, res) => {
       });
     })
   );
+    app.post(
+    '/api/assessment-cases/:caseCode/gates/:gateCode/confirm',
+    asyncHandler(async (req, res) => {
+      const { caseCode, gateCode } = req.params;
+
+      const confirmedBy =
+        typeof req.body?.confirmedBy === 'string'
+          ? req.body.confirmedBy.trim()
+          : '';
+
+      const comment =
+        typeof req.body?.comment === 'string'
+          ? req.body.comment.trim()
+          : undefined;
+
+      if (!confirmedBy) {
+        res.status(400).json({
+          error: 'Thiếu người xác nhận.',
+        });
+        return;
+      }
+
+      try {
+        const result = await workflowService.confirmGate(
+          caseCode,
+          gateCode,
+          confirmedBy,
+          comment
+        );
+
+        res.json(result);
+      } catch (error: any) {
+        const knownErrors: Record<string, string> = {
+          CASE_NOT_FOUND: 'Không tìm thấy hồ sơ đánh giá.',
+          GATE_NOT_FOUND: 'Không tìm thấy Gate.',
+          GATE_NOT_PENDING: 'Gate không ở trạng thái chờ xác nhận.',
+          INVALID_WORKFLOW_STEP:
+            'Không thể xác nhận Gate ở bước workflow hiện tại.',
+          UNSUPPORTED_GATE:
+            'Gate này chưa được hỗ trợ trong MVP.',
+          REVIEWER_MUST_DIFFER_FROM_ASSESSOR:
+            'Reviewer phải khác Assessor.',
+        };
+
+        const message = knownErrors[error?.message];
+
+        if (message) {
+          res.status(400).json({
+            error: message,
+            code: error.message,
+          });
+          return;
+        }
+
+        throw error;
+      }
+    })
+  );
   // ------------------------------------------------
   // Deployment Tasks API
   // ------------------------------------------------
