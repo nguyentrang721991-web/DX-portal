@@ -657,6 +657,7 @@ export function ProductDetailView({
           </div>
         )}
       </section>
+      <AssessmentWorkspace productId={product.id} productName={product.name} />
     </div>
   );
 }
